@@ -23,10 +23,13 @@ func main() {
 		Height: playerHeight,
 	}, ARROWS)
 
+	ball := newBall()
+
 	for !rl.WindowShouldClose() {
 		// update
 		player.update()
 		player2.update()
+		ball.update()
 
 		// draw
 		rl.BeginDrawing()
@@ -34,6 +37,7 @@ func main() {
 
 		player.draw()
 		player2.draw()
+		ball.draw()
 
 		rl.EndDrawing()
 	}
