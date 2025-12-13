@@ -31,10 +31,10 @@ func (b *Ball) draw() {
 	rl.DrawCircleV(b.coords, b.radius, rl.White)
 }
 
-func newBall() Ball {
+func newBall() *Ball {
 	coords := rl.Vector2{X: float32(rl.GetScreenWidth() / 2), Y: float32(rl.GetScreenHeight() / 2)}
 	direction := rl.Vector2{X: getRandFloat(-1, 1), Y: getRandFloat(-1, 1)}
-	return Ball{
+	return &Ball{
 		radius:    10,
 		coords:    coords,
 		speed:     float32(400),

@@ -10,6 +10,7 @@ func main() {
 	// player rect
 	playerWidth := float32(25)
 	playerHeight := float32(100)
+	//playerHeight := float32(rl.GetScreenHeight())
 	player := newPlayer(rl.Rectangle{
 		X:      0,
 		Y:      (float32(rl.GetScreenHeight()) - playerHeight) / 2,
@@ -31,6 +32,8 @@ func main() {
 		player2.update()
 		ball.update()
 
+		resolveCollisions(player, player2, ball)
+
 		// draw
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
@@ -42,4 +45,16 @@ func main() {
 		rl.EndDrawing()
 	}
 	rl.CloseWindow()
+}
+
+func resolveCollisions(p1 *Player, p2 *Player, b *Ball) {
+	if rl.CheckCollisionCircleRec(b.coords, b.radius, p1.rect) { // colliding to left paddle
+		rl.DrawText("Colliding p1", 100, 100, 50, rl.Red)
+		b.coords.X = p1.rect.X + p1.rect.Width + b.radius
+		b.direction.X = -b.direction.X
+	} else if rl.CheckCollisionCircleRec(b.coords, b.radius, p2.rect) { // colliding to right paddle
+		rl.DrawText("Colliding p2", 100, 100, 50, rl.Red)
+		b.coords.X = p2.rect.X - b.radius
+		b.direction.X = -b.direction.X
+	}
 }

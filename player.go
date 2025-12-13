@@ -58,8 +58,8 @@ func (p *Player) update() {
 	}
 }
 
-func newPlayer(rect rl.Rectangle, controls MovementKeys) Player {
-	return Player{
+func newPlayer(rect rl.Rectangle, controls MovementKeys) *Player {
+	return &Player{
 		rect:      rect,
 		speed:     400,
 		direction: 0,
