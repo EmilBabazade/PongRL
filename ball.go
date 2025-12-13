@@ -12,13 +12,19 @@ type Ball struct {
 }
 
 func (b *Ball) update() {
-	// TODO move in random dir
 	dt := rl.GetFrameTime()
 	direction := rl.Vector2Normalize(b.direction)
 	b.coords.X += direction.X * b.speed * dt
 	b.coords.Y += direction.Y * b.speed * dt
 
 	// TODO change direction when colliding with upper and lower bounds of the screen
+	lowerBound := float32(0) + b.radius
+	upperBound := float32(rl.GetScreenHeight()) - b.radius
+	if b.coords.Y <= lowerBound {
+		b.direction.Y = 1
+	} else if b.coords.Y >= upperBound {
+		b.direction.Y = -1
+	}
 }
 
 func (b *Ball) draw() {
