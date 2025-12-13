@@ -37,6 +37,15 @@ type Player struct {
 	direction int
 	controls  MovementKeys
 	ai        *AI
+	paused    bool
+}
+
+func (p *Player) pause() {
+	p.paused = true
+}
+
+func (p *Player) resume() {
+	p.paused = false
 }
 
 func (p *Player) draw() {
@@ -44,6 +53,10 @@ func (p *Player) draw() {
 }
 
 func (p *Player) update() {
+	if p.paused {
+		return
+	}
+
 	if p.ai == nil {
 		// set input keys
 		var upKey int32 = rl.KeyW
@@ -90,5 +103,6 @@ func newPlayer(rect rl.Rectangle, controls MovementKeys, ai *AI) *Player {
 		direction: 0,
 		controls:  controls,
 		ai:        ai,
+		paused:    false,
 	}
 }

@@ -10,9 +10,21 @@ type Ball struct {
 	speed        float32
 	direction    rl.Vector2
 	scoreManager *ScoreManager
+	paused       bool
+}
+
+func (b *Ball) pause() {
+	b.paused = true
+}
+
+func (b *Ball) resume() {
+	b.paused = false
 }
 
 func (b *Ball) update() {
+	if b.paused {
+		return
+	}
 	dt := rl.GetFrameTime()
 	direction := rl.Vector2Normalize(b.direction)
 	b.coords.X += direction.X * b.speed * dt
@@ -50,5 +62,6 @@ func newBall(scoreManager *ScoreManager) *Ball {
 		speed:        float32(400),
 		direction:    direction,
 		scoreManager: scoreManager,
+		paused:       false,
 	}
 }
