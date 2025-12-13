@@ -1,13 +1,16 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	"fmt"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 func main() {
 	rl.InitWindow(800, 600, "Pong")
 	rl.SetTargetFPS(60)
 	rl.SetExitKey(rl.KeyEscape)
 
-	// player rect
 	playerWidth := float32(25)
 	playerHeight := float32(100)
 	//playerHeight := float32(rl.GetScreenHeight())
@@ -24,7 +27,8 @@ func main() {
 		Height: playerHeight,
 	}, ARROWS)
 
-	ball := newBall()
+	scoreManager := &ScoreManager{}
+	ball := newBall(scoreManager)
 
 	for !rl.WindowShouldClose() {
 		// update
@@ -41,19 +45,27 @@ func main() {
 		player.draw()
 		player2.draw()
 		ball.draw()
+		scoreText(scoreManager)
 
 		rl.EndDrawing()
 	}
 	rl.CloseWindow()
 }
 
+func scoreText(scoreManager *ScoreManager) {
+	score := fmt.Sprintf("%d:%d", scoreManager.p1, scoreManager.p2)
+	textWidth := rl.MeasureText(score, 50)
+	xCord := int32(rl.GetScreenWidth()/2 - int(textWidth/2))
+	rl.DrawText(score, xCord, 0, 50, rl.White)
+}
+
 func resolveCollisions(p1 *Player, p2 *Player, b *Ball) {
 	if rl.CheckCollisionCircleRec(b.coords, b.radius, p1.rect) { // colliding to left paddle
-		rl.DrawText("Colliding p1", 100, 100, 50, rl.Red)
+		//rl.DrawText("Colliding p1", 100, 100, 50, rl.Red)
 		b.coords.X = p1.rect.X + p1.rect.Width + b.radius
 		b.direction.X = -b.direction.X
 	} else if rl.CheckCollisionCircleRec(b.coords, b.radius, p2.rect) { // colliding to right paddle
-		rl.DrawText("Colliding p2", 100, 100, 50, rl.Red)
+		//rl.DrawText("Colliding p2", 100, 100, 50, rl.Red)
 		b.coords.X = p2.rect.X - b.radius
 		b.direction.X = -b.direction.X
 	}
