@@ -19,16 +19,18 @@ func main() {
 		Y:      (float32(rl.GetScreenHeight()) - playerHeight) / 2,
 		Width:  playerWidth,
 		Height: playerHeight,
-	}, WASD)
+	}, WASD, nil)
+
+	scoreManager := &ScoreManager{}
+	ball := newBall(scoreManager)
+
+	ai := newAI(ball)
 	player2 := newPlayer(rl.Rectangle{
 		X:      float32(rl.GetScreenWidth()) - playerWidth,
 		Y:      (float32(rl.GetScreenHeight()) - playerHeight) / 2,
 		Width:  playerWidth,
 		Height: playerHeight,
-	}, ARROWS)
-
-	scoreManager := &ScoreManager{}
-	ball := newBall(scoreManager)
+	}, ARROWS, ai)
 
 	for !rl.WindowShouldClose() {
 		// update
@@ -64,9 +66,11 @@ func resolveCollisions(p1 *Player, p2 *Player, b *Ball) {
 		//rl.DrawText("Colliding p1", 100, 100, 50, rl.Red)
 		b.coords.X = p1.rect.X + p1.rect.Width + b.radius
 		b.direction.X = -b.direction.X
+		b.speed += b.speed * 0.1
 	} else if rl.CheckCollisionCircleRec(b.coords, b.radius, p2.rect) { // colliding to right paddle
 		//rl.DrawText("Colliding p2", 100, 100, 50, rl.Red)
 		b.coords.X = p2.rect.X - b.radius
 		b.direction.X = -b.direction.X
+		b.speed += b.speed * 0.1
 	}
 }

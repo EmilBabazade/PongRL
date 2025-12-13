@@ -29,17 +29,12 @@ func (b *Ball) update() {
 
 	// reset when leaving screen bounds horizontally ( that's player 1 or 2 scoring )
 	if b.coords.X <= 0 {
-		b.reset()
-		b.scoreManager.p1Score()
-	} else if b.coords.X >= float32(rl.GetScreenWidth()) {
-		b.reset()
 		b.scoreManager.p2Score()
+		*b = *newBall(b.scoreManager)
+	} else if b.coords.X >= float32(rl.GetScreenWidth()) {
+		b.scoreManager.p1Score()
+		*b = *newBall(b.scoreManager)
 	}
-}
-
-func (b *Ball) reset() {
-	b.coords = rl.Vector2{X: float32(rl.GetScreenWidth() / 2), Y: float32(rl.GetScreenHeight() / 2)}
-	b.direction = rl.Vector2{X: getRandFloat(-1, 1), Y: getRandFloat(-1, 1)}
 }
 
 func (b *Ball) draw() {
@@ -48,7 +43,7 @@ func (b *Ball) draw() {
 
 func newBall(scoreManager *ScoreManager) *Ball {
 	coords := rl.Vector2{X: float32(rl.GetScreenWidth() / 2), Y: float32(rl.GetScreenHeight() / 2)}
-	direction := rl.Vector2{X: getRandFloat(-1, 1), Y: getRandFloat(-1, 1)}
+	direction := rl.Vector2{X: getRandFloat(-1, 1), Y: getRandFloat(-0.5, 0.5)}
 	return &Ball{
 		radius:       10,
 		coords:       coords,
