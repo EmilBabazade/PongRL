@@ -42,6 +42,11 @@ func main() {
 		player2.update()
 		ball.update()
 
+		// if window gets resized move right paddle since its at edge of screen not on coord 0
+		if rl.IsWindowResized() {
+			player2.rect.X = float32(rl.GetScreenWidth()) - playerWidth
+		}
+
 		if rl.IsKeyPressed(rl.KeySpace) {
 			if gamePaused {
 				resumeAll(player, player2, ball)
@@ -106,18 +111,39 @@ func resumeAll(items ...Pausable) {
 }
 
 func pauseMenu() {
-	rg.Label(rl.Rectangle{X: 300, Y: 100, Width: 200, Height: 30}, "HELLO")
-	drawText("PONG", 100, 3)
-	rect := rl.Rectangle{
-		X:      100,
-		Y:      100,
-		Width:  200,
-		Height: 50,
-	}
-	rg.Button(rect, "RESUME")
-	//drawButton("RESUME", 50, 5, 0.05)
-	//drawButton("RESTART", 50, 6, 0.05)
-	//drawButton("QUIT", 50, 7, 0.05)
+	w := float32(rl.GetScreenWidth())
+	h := float32(rl.GetScreenHeight())
+
+	centerX := w * 0.5
+
+	// ---- TITLE ----
+	title := "PONG"
+	titleSize := int32(72)
+	titleY := h * 0.25
+
+	titleX := float32(centerText(title, titleSize))
+	rl.DrawText(title, int32(titleX), int32(titleY), titleSize, rl.White)
+
+	// ---- BUTTONS ----
+	btnW := float32(240)
+	btnH := float32(56)
+	btnX := centerX - btnW*0.5
+
+	startY := titleY + float32(titleSize) + 40
+	gap := float32(16)
+
+	resumeRect := rl.Rectangle{X: btnX, Y: startY, Width: btnW, Height: btnH}
+	restartRect := rl.Rectangle{X: btnX, Y: startY + btnH + gap, Width: btnW, Height: btnH}
+	quitRect := rl.Rectangle{X: btnX, Y: startY + (btnH+gap)*2, Width: btnW, Height: btnH}
+
+	// draw buttons (hook logic yourself)
+	rg.Button(resumeRect, "RESUME")
+	rg.Button(restartRect, "RESTART")
+	rg.Button(quitRect, "QUIT")
+}
+
+func centerText(text string, fontSize int32) int32 {
+	return int32(rl.GetScreenWidth()/2) - rl.MeasureText(text, fontSize)/2
 }
 
 func drawButton(text string, fontSize int32, spacing int, padding float32) {
