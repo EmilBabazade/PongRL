@@ -7,11 +7,21 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+type Game struct {
+	p1           *Player
+	p2           *Player
+	b            *Ball
+	scoreManager *ScoreManager
+	paused       bool
+}
+
+var game *Game = &Game{}
+
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(800, 600, "Pong")
 	rl.SetTargetFPS(60)
-	rl.SetExitKey(rl.KeyEscape)
+	rl.SetExitKey(rl.KeyQ)
 	rg.SetStyle(rg.DEFAULT, rg.TEXT_SIZE, 32)
 
 	playerWidth := float32(25)
@@ -35,7 +45,12 @@ func main() {
 		Height: playerHeight,
 	}, ARROWS, ai)
 
-	gamePaused := false
+	game.p1 = player
+	game.p2 = player2
+	game.b = ball
+	game.paused = false
+	game.scoreManager = scoreManager
+
 	for !rl.WindowShouldClose() {
 		// update
 		player.update()
@@ -47,13 +62,13 @@ func main() {
 			player2.rect.X = float32(rl.GetScreenWidth()) - playerWidth
 		}
 
-		if rl.IsKeyPressed(rl.KeySpace) {
-			if gamePaused {
-				resumeAll(player, player2, ball)
-				gamePaused = false
+		if rl.IsKeyPressed(rl.KeyEscape) {
+			if game.paused {
+				resumeAll()
+				game.paused = false
 			} else {
-				pauseAll(player, player2, ball)
-				gamePaused = true
+				pauseAll()
+				game.paused = true
 			}
 		}
 
@@ -68,13 +83,38 @@ func main() {
 		ball.draw()
 		scoreText(scoreManager)
 
-		if gamePaused {
+		if game.paused {
 			pauseMenu()
 		}
 
 		rl.EndDrawing()
 	}
 	rl.CloseWindow()
+}
+
+func reset() {
+	playerWidth := float32(25)
+	playerHeight := float32(100)
+	//playerHeight := float32(rl.GetScreenHeight())
+	*(game.p1) = *newPlayer(rl.Rectangle{
+		X:      0,
+		Y:      (float32(rl.GetScreenHeight()) - playerHeight) / 2,
+		Width:  playerWidth,
+		Height: playerHeight,
+	}, WASD, nil)
+
+	*(game.scoreManager) = ScoreManager{}
+	*(game.b) = *newBall(game.scoreManager)
+
+	ai := newAI(game.b)
+	*(game.p2) = *newPlayer(rl.Rectangle{
+		X:      float32(rl.GetScreenWidth()) - playerWidth,
+		Y:      (float32(rl.GetScreenHeight()) - playerHeight) / 2,
+		Width:  playerWidth,
+		Height: playerHeight,
+	}, ARROWS, ai)
+
+	resumeAll()
 }
 
 func resolveCollisions(p1 *Player, p2 *Player, b *Ball) {
@@ -98,16 +138,18 @@ func scoreText(scoreManager *ScoreManager) {
 	rl.DrawText(score, xCord, 0, 50, rl.White)
 }
 
-func pauseAll(items ...Pausable) {
-	for _, item := range items {
-		item.pause()
-	}
+func pauseAll() {
+	game.p1.pause()
+	game.p2.pause()
+	game.b.pause()
+	game.paused = true
 }
 
-func resumeAll(items ...Pausable) {
-	for _, item := range items {
-		item.resume()
-	}
+func resumeAll() {
+	game.p1.resume()
+	game.p2.resume()
+	game.b.resume()
+	game.paused = false
 }
 
 func pauseMenu() {
@@ -137,32 +179,17 @@ func pauseMenu() {
 	quitRect := rl.Rectangle{X: btnX, Y: startY + (btnH+gap)*2, Width: btnW, Height: btnH}
 
 	// draw buttons (hook logic yourself)
-	rg.Button(resumeRect, "RESUME")
-	rg.Button(restartRect, "RESTART")
-	rg.Button(quitRect, "QUIT")
+	if rg.Button(resumeRect, "RESUME") {
+		resumeAll()
+	}
+	if rg.Button(restartRect, "RESTART") {
+		reset()
+	}
+	if rg.Button(quitRect, "QUIT") {
+		rl.CloseWindow()
+	}
 }
 
 func centerText(text string, fontSize int32) int32 {
 	return int32(rl.GetScreenWidth()/2) - rl.MeasureText(text, fontSize)/2
-}
-
-func drawButton(text string, fontSize int32, spacing int, padding float32) {
-	textWidth := float32(rl.MeasureText(text, fontSize) / 2)
-	rect := rl.Rectangle{
-		X:      float32(getHCenter(text, fontSize)) - float32(fontSize)*padding*2,
-		Y:      float32(rl.GetScreenHeight()/10*spacing) - float32(fontSize)*padding,
-		Width:  textWidth*2 + textWidth*2*padding,
-		Height: float32(fontSize) + float32(fontSize)*padding*2,
-	}
-	rl.DrawRectangleLinesEx(rect, 1, rl.White)
-	drawText(text, fontSize, spacing)
-}
-
-func drawText(text string, fontSize int32, spacing int) {
-	xCord := getHCenter(text, fontSize)
-	rl.DrawText(text, xCord, int32(rl.GetScreenHeight()/10*spacing), fontSize, rl.White)
-}
-
-func getHCenter(txt string, fontSize int32) int32 {
-	return int32(rl.GetScreenWidth()/2) - rl.MeasureText(txt, fontSize)/2
 }
